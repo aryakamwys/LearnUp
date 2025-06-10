@@ -1,0 +1,34 @@
+type Query {
+  allCourses: [Course!]!
+  course(id: ID!): Course
+}
+
+type Mutation {
+  createCourse(input: CreateCourseInput!): Course
+  updateCourse(input: UpdateCourseInput!): Course
+  deleteCourse(id: ID!): Boolean
+}
+
+# Main Type
+type Course {
+  id: ID!
+  title: String!
+  description: String
+  content: String
+  created_at: String
+  updated_at: String
+}
+
+# Input Types
+input CreateCourseInput {
+  title: String!
+  description: String
+  content: String
+}
+
+input UpdateCourseInput {
+  id: ID!
+  title: String
+  description: String
+  content: String
+}

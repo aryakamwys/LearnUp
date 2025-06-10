@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Management</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Course Management System</h1>
+        </header>
+        
+        <div class="course-form">
+            <h2>Add/Edit Course</h2>
+            <form id="courseForm">
+                <input type="hidden" id="courseId">
+                <div class="form-group">
+                    <label for="title">Title:</label>
+                    <input type="text" id="title" required>
+                </div>
+                <div class="form-group">
+                    <label for="description">Description:</label>
+                    <textarea id="description" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="instructor">Instructor:</label>
+                    <input type="text" id="instructor" required>
+                </div>
+                <div class="form-group">
+                    <button type="submit" id="submitBtn">Add Course</button>
+                    <button type="button" id="cancelBtn" style="display: none;">Cancel</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="courses-list">
+            <h2>Courses</h2>
+            <div id="coursesList"></div>
+        </div>
+    </div>
+    <script src="/static/js/main.js"></script>
+</body>
+</html> 

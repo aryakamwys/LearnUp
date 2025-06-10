@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  auth:
+    build: .
+    ports:
+      - "5001:5000"
+    volumes:
+      - .:/app
+      - ./data:/app/data
+    environment:
+      - FLASK_APP=main.py
+      - FLASK_ENV=development
+      - SECRET_KEY=your-secret-key-change-in-production
+    command: python main.py
+  course-service:
+    build:
+      context: ./course
+      dockerfile: Dockerfile
+    ports:
+      - "5001:5000"
+    volumes:
+      - ./course:/app
+    environment:
+      - FLASK_ENV=development
+      - FLASK_APP=service/app.py
+    restart: unless-stopped 
