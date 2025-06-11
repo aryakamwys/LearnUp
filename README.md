@@ -1,4 +1,6 @@
 📘 Project Documentation – Microservices Architecture LearnUp
+
+
 🧱 Tech Stack
 Backend Framework: Flask
 
@@ -7,6 +9,7 @@ API Layer: GraphQL
 Database: SQLite
 
 Containerization: Docker, Docker Compose
+
 
 🧩 Microservices Overview
 1. 🔐 Authentication Service (User)
