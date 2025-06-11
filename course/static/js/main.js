@@ -19,11 +19,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (courseId) {
                 await updateCourse(courseId, { title, description, content });
                 resetForm();
-                await loadCourses(); // reload for consistency
+                await loadCourses();
             } else {
                 const newCourse = await createCourse({ title, description, content });
-                courses.push(newCourse); // Optimistic update
-                displayCourses(); // update UI without full reload
+                courses.push(newCourse);
+                displayCourses();
                 resetForm();
             }
         } catch (error) {
@@ -41,21 +41,11 @@ document.addEventListener('DOMContentLoaded', () => {
             body: JSON.stringify({ query, variables })
         });
 
-        if (!res.ok) {
-            throw new Error("Network error: " + res.status);
-        }
+        if (!res.ok) throw new Error("Network error: " + res.status);
 
         const json = await res.json();
-
-        if (json.errors) {
-            console.error("GraphQL Errors:", json.errors);
-            throw new Error(json.errors.map(e => e.message).join('\n'));
-        }
-
-        if (!json.data) {
-            throw new Error("GraphQL response missing data.");
-        }
-
+        if (json.errors) throw new Error(json.errors.map(e => e.message).join('\n'));
+        if (!json.data) throw new Error("No data in GraphQL response.");
         return json.data;
     }
 
@@ -116,15 +106,21 @@ document.addEventListener('DOMContentLoaded', () => {
         coursesList.innerHTML = '';
         courses.forEach(course => {
             const el = document.createElement('div');
-            el.className = 'course-card';
+            el.className = 'bg-white p-4 rounded-xl shadow hover:shadow-lg transition';
+
             el.innerHTML = `
-                <h3>${course.title}</h3>
-                <p>${course.description}</p>
-                <div class="course-actions">
-                    <button onclick="editCourse('${course.id}')">Edit</button>
-                    <button onclick="deleteCourseHandler('${course.id}')">Delete</button>
+                <a href="/course.html?id=${course.id}" class="block">
+                    <h3 class="text-lg font-semibold text-blue-700 hover:underline cursor-pointer mb-1">
+                        ${course.title}
+                    </h3>
+                </a>
+                <p class="text-sm text-gray-600">${course.description}</p>
+                <div class="flex gap-2 mt-4">
+                    <button onclick="editCourse('${course.id}')" class="px-3 py-1 bg-green-800 text-white rounded hover:bg-green-700">Edit</button>
+                    <button onclick="deleteCourseHandler('${course.id}')" class="px-3 py-1 bg-red-700 text-white rounded hover:bg-red-600">Delete</button>
                 </div>
             `;
+
             coursesList.appendChild(el);
         });
     }
@@ -137,7 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('description').value = course.description;
             document.getElementById('content').value = course.content;
             submitBtn.textContent = 'Update Course';
-            cancelBtn.style.display = 'inline-block';
+            cancelBtn.classList.remove('hidden');
         }
     };
 
@@ -145,7 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (confirm("Delete this course?")) {
             try {
                 await deleteCourse(id);
-                await loadCourses(); // reload after deletion
+                await loadCourses();
             } catch (err) {
                 console.error(err);
                 alert("Error during deletion: " + err.message);
@@ -157,6 +153,6 @@ document.addEventListener('DOMContentLoaded', () => {
         courseForm.reset();
         document.getElementById('courseId').value = '';
         submitBtn.textContent = 'Add Course';
-        cancelBtn.style.display = 'none';
+        cancelBtn.classList.add('hidden');
     }
 });

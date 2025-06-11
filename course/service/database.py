@@ -13,12 +13,10 @@ Base = declarative_base()
 Base.query = db_session.query_property()
 
 def init_db():
-    # Import all modules here that might define models
     from auth.models.user import User
     from auth.models.session import Session
     Base.metadata.create_all(bind=engine)
     
-    # Create courses table
     engine.execute("""
         CREATE TABLE IF NOT EXISTS courses (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
