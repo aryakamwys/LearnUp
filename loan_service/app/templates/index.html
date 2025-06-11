@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Loan Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body class="bg-gray-100">
+    <div id="app" class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">Course Loan Management</h1>
+            <p class="text-gray-600">Manage your course loans efficiently</p>
+        </header>
+
+        <!-- Create Loan Form -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-xl font-semibold mb-4">Create New Loan</h2>
+            <form @submit.prevent="createLoan" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">User ID</label>
+                    <input type="number" v-model="newLoan.userId" required
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Course ID</label>
+                    <input type="number" v-model="newLoan.courseId" required
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+                <button type="submit"
+                    class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                    Create Loan
+                </button>
+            </form>
+        </div>
+
+        <!-- Loans List -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold mb-4">Active Loans</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User ID</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Course ID</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Loan Date</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <tr v-for="loan in loans" :key="loan.id">
+                            <td class="px-6 py-4 whitespace-nowrap" v-text="loan.id"></td>
+                            <td class="px-6 py-4 whitespace-nowrap" v-text="loan.userId"></td>
+                            <td class="px-6 py-4 whitespace-nowrap" v-text="loan.courseId"></td>
+                            <td class="px-6 py-4 whitespace-nowrap" v-text="formatDate(loan.loanDate)"></td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span :class="[
+                                    loan.isReturned ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800',
+                                    'px-2 inline-flex text-xs leading-5 font-semibold rounded-full'
+                                ]" v-text="loan.isReturned ? 'Returned' : 'Active'">
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <button v-if="!loan.isReturned" @click="returnLoan(loan.id)"
+                                    class="text-blue-600 hover:text-blue-900">Return</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp } = Vue
+
+        createApp({
+            data() {
+                return {
+                    loans: [],
+                    newLoan: {
+                        userId: '',
+                        courseId: ''
+                    }
+                }
+            },
+            methods: {
+                async fetchLoans() {
+                    const query = `
+                        query {
+                            allLoans {
+                                id
+                                userId
+                                courseId
+                                loanDate
+                                isReturned
+                            }
+                        }
+                    `
+                    try {
+                        const response = await fetch('/graphql', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ query })
+                        })
+                        const result = await response.json()
+                        this.loans = result.data.allLoans
+                    } catch (error) {
+                        console.error('Error fetching loans:', error)
+                    }
+                },
+                async createLoan() {
+                    const mutation = `
+                        mutation ($userId: Int!, $courseId: Int!) {
+                            createLoan(userId: $userId, courseId: $courseId) {
+                                loan {
+                                    id
+                                    userId
+                                    courseId
+                                    loanDate
+                                    isReturned
+                                }
+                                ok
+                            }
+                        }
+                    `
+                    try {
+                        const response = await fetch('/graphql', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                query: mutation,
+                                variables: {
+                                    userId: parseInt(this.newLoan.userId),
+                                    courseId: parseInt(this.newLoan.courseId)
+                                }
+                            })
+                        })
+                        const result = await response.json()
+                        if (result.data.createLoan.ok) {
+                            this.newLoan.userId = ''
+                            this.newLoan.courseId = ''
+                            await this.fetchLoans()
+                        }
+                    } catch (error) {
+                        console.error('Error creating loan:', error)
+                    }
+                },
+                async returnLoan(id) {
+                    const mutation = `
+                        mutation ($id: Int!) {
+                            returnLoan(id: $id) {
+                                loan {
+                                    id
+                                    isReturned
+                                }
+                                ok
+                            }
+                        }
+                    `
+                    try {
+                        const response = await fetch('/graphql', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                query: mutation,
+                                variables: { id }
+                            })
+                        })
+                        const result = await response.json()
+                        if (result.data.returnLoan.ok) {
+                            await this.fetchLoans()
+                        }
+                    } catch (error) {
+                        console.error('Error returning loan:', error)
+                    }
+                },
+                formatDate(date) {
+                    return new Date(date).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    })
+                }
+            },
+            mounted() {
+                this.fetchLoans()
+            }
+        }).mount('#app')
+    </script>
+</body>
+</html> 

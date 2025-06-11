@@ -1,0 +1,20 @@
+# docker-compose.yml
+version: '3.8' # Menggunakan versi Docker Compose yang lebih baru
+
+services:
+  loan-service:
+    build: . # Menginstruksikan Docker Compose untuk membangun image dari Dockerfile di direktori saat ini
+    container_name: loan_service_container # Nama opsional untuk kontainer
+    ports:
+      - "5000:5000" # Memetakan port 5000 dari host ke port 5000 di dalam kontainer
+    volumes:
+      # Memasang (mount) direktori 'data' dari host ke direktori '/app/data' di dalam kontainer.
+      # Ini akan memastikan database SQLite (loans.db) Anda tetap ada di host,
+      # bahkan jika kontainer dihapus atau dibuat ulang.
+      - ./data:/app/data
+    environment:
+      # Variabel lingkungan untuk Flask, agar Flask CLI menemukan aplikasi dengan benar
+      - FLASK_APP=app.app:app
+      - FLASK_DEBUG=1 # Aktifkan mode debug Flask
+
+    command: python -m flask run --host=0.0.0.0

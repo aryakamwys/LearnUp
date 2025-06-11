@@ -2,17 +2,21 @@ version: '3.8'
 
 services:
   auth:
-    build: .
+    build:
+      context: ./auth
+      dockerfile: Dockerfile
     ports:
       - "5001:5000"
     volumes:
-      - .:/app
-      - ./data:/app/data
+      - ./auth:/app
+      - ./auth/data:/app/data
     environment:
-      - FLASK_APP=main.py
       - FLASK_ENV=development
-      - SECRET_KEY=your-secret-key-change-in-production
-    command: python main.py
+      - FLASK_APP=app.py
+      - PYTHONPATH=/app
+    networks:
+      - app_network
+    command: python app.py
 
   course-service:
     build:
@@ -26,5 +30,29 @@ services:
       - FLASK_ENV=development
       - FLASK_APP=service/app.py
       - IN_DOCKER=1
+      - PYTHONPATH=/app
+    networks:
+      - app_network
     command: python service/app.py 
     restart: unless-stopped
+
+  loan-service:
+    build:
+      context: ./loan_service
+      dockerfile: Dockerfile
+    ports:
+      - "5003:5000"
+    volumes:
+      - ./loan_service:/app
+    environment:
+      - FLASK_ENV=development
+      - FLASK_APP=main.py
+      - PYTHONPATH=/app
+    networks:
+      - app_network
+    command: python main.py
+    restart: unless-stopped
+
+networks:
+  app_network:
+    driver: bridge

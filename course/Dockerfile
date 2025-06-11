@@ -10,7 +10,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Expose port 5000
-EXPOSE 5000
+EXPOSE 5001
 
 # Jalankan app Python
 CMD ["python", "course/service/app.py"]
