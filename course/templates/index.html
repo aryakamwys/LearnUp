@@ -1,45 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Course Management</title>
-    <link rel="stylesheet" href="/static/css/styles.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GraphQL Course Manager</title>
+  <link rel="stylesheet" href="/static/css/styles.css" />
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Course Management System</h1>
-        </header>
-        
-        <div class="course-form">
-            <h2>Add/Edit Course</h2>
-            <form id="courseForm">
-                <input type="hidden" id="courseId">
-                <div class="form-group">
-                    <label for="title">Title:</label>
-                    <input type="text" id="title" required>
-                </div>
-                <div class="form-group">
-                    <label for="description">Description:</label>
-                    <textarea id="description" required></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="instructor">Instructor:</label>
-                    <input type="text" id="instructor" required>
-                </div>
-                <div class="form-group">
-                    <button type="submit" id="submitBtn">Add Course</button>
-                    <button type="button" id="cancelBtn" style="display: none;">Cancel</button>
-                </div>
-            </form>
-        </div>
+  <div class="container">
+    <header>
+      <h1>📘 Course Management</h1>
+      <p>Manage your course list using GraphQL API</p>
+    </header>
 
-        <div class="courses-list">
-            <h2>Courses</h2>
-            <div id="coursesList"></div>
+    <section class="course-form">
+      <h2>Add / Edit Course</h2>
+      <form id="courseForm">
+        <input type="hidden" id="courseId" />
+        <div class="form-group">
+          <label for="title">Course Title</label>
+          <input type="text" id="title" required />
         </div>
-    </div>
-    <script src="/static/js/main.js"></script>
+        <div class="form-group">
+          <label for="description">Short Description</label>
+          <textarea id="description" required></textarea>
+        </div>
+        <div class="form-group">
+          <label for="content">Course Content</label>
+          <textarea id="content" required></textarea>
+        </div>
+        <div class="button-group">
+          <button type="submit" class="btn btn-primary" id="submitBtn">Add Course</button>
+          <button type="button" class="btn btn-cancel" id="cancelBtn" style="display: none;">Cancel</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="courses-list">
+      <h2>📚 Your Courses</h2>
+      <div id="coursesList" class="courses-grid"></div>
+    </section>
+  </div>
+
+  <script src="/static/js/main.js"></script>
 </body>
-</html> 
+</html>

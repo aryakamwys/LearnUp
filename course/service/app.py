@@ -1,75 +1,48 @@
-from flask import Flask, request, jsonify, send_from_directory
-import sqlite3
 import os
+import sys
 
-app = Flask(__name__, static_folder='../static', template_folder='../templates')
+# Root project path (misal dari 'iae_tubes')
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../'))
+sys.path.append(BASE_DIR)
 
-def get_db_connection():
-    conn = sqlite3.connect('course/service/courses.db')
-    conn.row_factory = sqlite3.Row
-    return conn
+IN_DOCKER = os.environ.get('IN_DOCKER') == '1'
+
+if IN_DOCKER:
+    STATIC_FOLDER = '/app/static'
+    TEMPLATE_FOLDER = '/app/templates'
+else:
+    BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../'))
+    sys.path.append(BASE_DIR)
+    STATIC_FOLDER = os.path.join(BASE_DIR, 'course', 'static')
+    TEMPLATE_FOLDER = os.path.join(BASE_DIR, 'course', 'templates')
+
+from flask import Flask, render_template
+from flask_graphql import GraphQLView
+from graphene import Schema
+from resolvers import Query, Mutation
+
+
+app = Flask(
+    __name__,
+    static_folder=STATIC_FOLDER,
+    template_folder=TEMPLATE_FOLDER
+)
+
+# Debug print: pastikan template path ditemukan
+print("TEMPLATE FOLDER:", TEMPLATE_FOLDER)
+print("INDEX EXISTS?", os.path.exists(os.path.join(TEMPLATE_FOLDER, 'index.html')))
+
+schema = Schema(query=Query, mutation=Mutation)
 
 @app.route('/')
 def index():
-    return send_from_directory(app.template_folder, 'index.html')
+    return render_template('index.html')
 
-@app.route('/api/courses', methods=['GET'])
-def get_courses():
-    conn = get_db_connection()
-    courses = conn.execute('SELECT * FROM courses').fetchall()
-    conn.close()
-    return jsonify([dict(course) for course in courses])
-
-@app.route('/api/courses', methods=['POST'])
-def create_course():
-    course_data = request.json
-    if not course_data or not all(key in course_data for key in ['title', 'description', 'instructor']):
-        return jsonify({'error': 'Missing required fields'}), 400
-
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute(
-        'INSERT INTO courses (title, description, instructor) VALUES (?, ?, ?)',
-        (course_data['title'], course_data['description'], course_data['instructor'])
-    )
-    conn.commit()
-    course_id = cursor.lastrowid
-    conn.close()
-
-    return jsonify({'id': course_id, **course_data}), 201
-
-@app.route('/api/courses/<int:id>', methods=['PUT'])
-def update_course(id):
-    course_data = request.json
-    if not course_data or not all(key in course_data for key in ['title', 'description', 'instructor']):
-        return jsonify({'error': 'Missing required fields'}), 400
-
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute(
-        'UPDATE courses SET title = ?, description = ?, instructor = ? WHERE id = ?',
-        (course_data['title'], course_data['description'], course_data['instructor'], id)
-    )
-    conn.commit()
-    conn.close()
-
-    if cursor.rowcount == 0:
-        return jsonify({'error': 'Course not found'}), 404
-
-    return jsonify({'id': id, **course_data})
-
-@app.route('/api/courses/<int:id>', methods=['DELETE'])
-def delete_course(id):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('DELETE FROM courses WHERE id = ?', (id,))
-    conn.commit()
-    conn.close()
-
-    if cursor.rowcount == 0:
-        return jsonify({'error': 'Course not found'}), 404
-
-    return '', 204
+# GraphQL endpoint
+app.add_url_rule(
+    '/graphql',
+    view_func=GraphQLView.as_view('graphql', schema=schema, graphiql=True)
+)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True) 
+    app.run(host='0.0.0.0', port=5000, debug=True)
