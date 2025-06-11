@@ -33,14 +33,14 @@ class Query(ObjectType):
 
     def resolve_all_courses(root, info):
         conn = sqlite3.connect(DB_PATH)
-        conn.row_factory = sqlite3.Row  # ✅ penting agar bisa dict(row)
+        conn.row_factory = sqlite3.Row
         rows = conn.execute("SELECT * FROM courses").fetchall()
         conn.close()
         return [CourseType(**dict(row)) for row in rows]
 
     def resolve_course(root, info, id):
         conn = sqlite3.connect(DB_PATH)
-        conn.row_factory = sqlite3.Row  # ✅
+        conn.row_factory = sqlite3.Row 
         row = conn.execute("SELECT * FROM courses WHERE id = ?", (id,)).fetchone()
         conn.close()
         return CourseType(**dict(row)) if row else None
@@ -54,7 +54,7 @@ class CreateCourse(Mutation):
 
     def mutate(root, info, input):
         conn = sqlite3.connect(DB_PATH)
-        conn.row_factory = sqlite3.Row  # ✅ fix error dict(row)
+        conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         cursor.execute("""
             INSERT INTO courses (title, description, content)
@@ -75,7 +75,7 @@ class UpdateCourse(Mutation):
 
     def mutate(root, info, input):
         conn = sqlite3.connect(DB_PATH)
-        conn.row_factory = sqlite3.Row  # ✅ fix konsisten
+        conn.row_factory = sqlite3.Row 
         conn.execute("""
             UPDATE courses
             SET title = ?, description = ?, content = ?, updated_at = CURRENT_TIMESTAMP
