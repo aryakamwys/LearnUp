@@ -1,7 +1,6 @@
 import os
 import sys
 
-# Root project path (misal dari 'iae_tubes')
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../'))
 sys.path.append(BASE_DIR)
 
@@ -28,7 +27,6 @@ app = Flask(
     template_folder=TEMPLATE_FOLDER
 )
 
-# Debug print: pastikan template path ditemukan
 print("TEMPLATE FOLDER:", TEMPLATE_FOLDER)
 print("INDEX EXISTS?", os.path.exists(os.path.join(TEMPLATE_FOLDER, 'index.html')))
 
@@ -38,7 +36,10 @@ schema = Schema(query=Query, mutation=Mutation)
 def index():
     return render_template('index.html')
 
-# GraphQL endpoint
+@app.route('/course.html')
+def course_detail():
+    return render_template('course.html')
+
 app.add_url_rule(
     '/graphql',
     view_func=GraphQLView.as_view('graphql', schema=schema, graphiql=True)
