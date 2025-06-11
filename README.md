@@ -40,26 +40,9 @@ Non-Docker	http://localhost:5000	http://localhost:5000/graphql
 🐳 Via Docker Compose
 Build dan jalankan semua service:
 
-bash
-Copy
-Edit
 docker-compose up --build
+
 🔁 Otomatis menjalankan semua service (auth dan course) dengan port sesuai mapping di docker-compose.yml.
 
-💻 Via Local (Non-Docker)
-Menjalankan masing-masing service:
-bash
-Copy
-Edit
-# Untuk Auth Service
-python app.py
-
-# Untuk Course Service (pastikan berada di direktori yang sesuai)
-python app.py
-Inisialisasi Database SQLite:
-bash
-Copy
-Edit
-python database.py
 🧾 Catatan
 Port Lokal untuk Non-Docker hanya menggunakan localhost:5000. Pastikan tidak menjalankan dua service secara bersamaan di port yang sama.
