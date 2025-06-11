@@ -4,127 +4,154 @@ document.addEventListener('DOMContentLoaded', () => {
     const submitBtn = document.getElementById('submitBtn');
     const cancelBtn = document.getElementById('cancelBtn');
 
-    // Load courses when the page loads
+    let courses = [];
+
     loadCourses();
 
-    // Handle form submission
     courseForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const courseId = document.getElementById('courseId').value;
         const title = document.getElementById('title').value;
         const description = document.getElementById('description').value;
-        const instructor = document.getElementById('instructor').value;
-
-        const courseData = {
-            title,
-            description,
-            instructor
-        };
+        const content = document.getElementById('content').value;
 
         try {
             if (courseId) {
-                // Update existing course
-                await updateCourse(courseId, courseData);
+                await updateCourse(courseId, { title, description, content });
+                resetForm();
+                await loadCourses(); // reload for consistency
             } else {
-                // Create new course
-                await createCourse(courseData);
+                const newCourse = await createCourse({ title, description, content });
+                courses.push(newCourse); // Optimistic update
+                displayCourses(); // update UI without full reload
+                resetForm();
             }
-            resetForm();
-            loadCourses();
         } catch (error) {
-            console.error('Error:', error);
-            alert('An error occurred while saving the course.');
+            console.error(error);
+            alert("Error: " + error.message);
         }
     });
 
-    // Handle cancel button
-    cancelBtn.addEventListener('click', () => {
-        resetForm();
-    });
+    cancelBtn.addEventListener('click', resetForm);
+
+    async function graphqlRequest(query, variables = {}) {
+        const res = await fetch('/graphql', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ query, variables })
+        });
+
+        if (!res.ok) {
+            throw new Error("Network error: " + res.status);
+        }
+
+        const json = await res.json();
+
+        if (json.errors) {
+            console.error("GraphQL Errors:", json.errors);
+            throw new Error(json.errors.map(e => e.message).join('\n'));
+        }
+
+        if (!json.data) {
+            throw new Error("GraphQL response missing data.");
+        }
+
+        return json.data;
+    }
 
     async function loadCourses() {
-        try {
-            const response = await fetch('/api/courses');
-            const courses = await response.json();
-            displayCourses(courses);
-        } catch (error) {
-            console.error('Error loading courses:', error);
-            coursesList.innerHTML = '<p>Error loading courses. Please try again later.</p>';
-        }
+        const query = `
+            query {
+                allCourses {
+                    id
+                    title
+                    description
+                    content
+                }
+            }
+        `;
+        const data = await graphqlRequest(query);
+        courses = data.allCourses;
+        displayCourses();
     }
 
-    async function createCourse(courseData) {
-        const response = await fetch('/api/courses', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(courseData),
-        });
-        if (!response.ok) throw new Error('Failed to create course');
-        return response.json();
+    async function createCourse(input) {
+        const mutation = `
+            mutation($input: CreateCourseInput!) {
+                createCourse(input: $input) {
+                    id
+                    title
+                    description
+                    content
+                }
+            }
+        `;
+        const data = await graphqlRequest(mutation, { input });
+        return data.createCourse;
     }
 
-    async function updateCourse(id, courseData) {
-        const response = await fetch(`/api/courses/${id}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(courseData),
+    async function updateCourse(id, inputData) {
+        const mutation = `
+            mutation($input: UpdateCourseInput!) {
+                updateCourse(input: $input) {
+                    id
+                }
+            }
+        `;
+        await graphqlRequest(mutation, {
+            input: { id, ...inputData }
         });
-        if (!response.ok) throw new Error('Failed to update course');
-        return response.json();
     }
 
     async function deleteCourse(id) {
-        const response = await fetch(`/api/courses/${id}`, {
-            method: 'DELETE',
-        });
-        if (!response.ok) throw new Error('Failed to delete course');
+        const mutation = `
+            mutation($id: ID!) {
+                deleteCourse(id: $id)
+            }
+        `;
+        await graphqlRequest(mutation, { id });
     }
 
-    function displayCourses(courses) {
+    function displayCourses() {
         coursesList.innerHTML = '';
         courses.forEach(course => {
-            const courseElement = document.createElement('div');
-            courseElement.className = 'course-card';
-            courseElement.innerHTML = `
+            const el = document.createElement('div');
+            el.className = 'course-card';
+            el.innerHTML = `
                 <h3>${course.title}</h3>
-                <p><strong>Instructor:</strong> ${course.instructor}</p>
                 <p>${course.description}</p>
                 <div class="course-actions">
-                    <button class="edit-btn" onclick="editCourse(${course.id})">Edit</button>
-                    <button class="delete-btn" onclick="deleteCourseHandler(${course.id})">Delete</button>
+                    <button onclick="editCourse('${course.id}')">Edit</button>
+                    <button onclick="deleteCourseHandler('${course.id}')">Delete</button>
                 </div>
             `;
-            coursesList.appendChild(courseElement);
+            coursesList.appendChild(el);
         });
     }
 
-    function editCourse(id) {
-        const course = courses.find(c => c.id === id);
+    window.editCourse = function (id) {
+        const course = courses.find(c => c.id == id);
         if (course) {
             document.getElementById('courseId').value = course.id;
             document.getElementById('title').value = course.title;
             document.getElementById('description').value = course.description;
-            document.getElementById('instructor').value = course.instructor;
+            document.getElementById('content').value = course.content;
             submitBtn.textContent = 'Update Course';
             cancelBtn.style.display = 'inline-block';
         }
-    }
+    };
 
-    async function deleteCourseHandler(id) {
-        if (confirm('Are you sure you want to delete this course?')) {
+    window.deleteCourseHandler = async function (id) {
+        if (confirm("Delete this course?")) {
             try {
                 await deleteCourse(id);
-                loadCourses();
-            } catch (error) {
-                console.error('Error deleting course:', error);
-                alert('Failed to delete course. Please try again.');
+                await loadCourses(); // reload after deletion
+            } catch (err) {
+                console.error(err);
+                alert("Error during deletion: " + err.message);
             }
         }
-    }
+    };
 
     function resetForm() {
         courseForm.reset();
@@ -132,4 +159,4 @@ document.addEventListener('DOMContentLoaded', () => {
         submitBtn.textContent = 'Add Course';
         cancelBtn.style.display = 'none';
     }
-}); 
+});
