@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kerjakan Quiz - LearnUp</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <nav class="bg-white shadow-sm py-4 px-8 flex items-center justify-between">
+        <div class="text-xl font-bold text-gray-800">LearnUp</div>
+        <div class="space-x-6">
+            <a href="/" class="text-blue-700 hover:underline">Admin</a>
+            <a href="/user_quiz" class="text-blue-700 hover:underline font-semibold">Kerjakan Quiz</a>
+        </div>
+    </nav>
+    <div id="app" class="max-w-2xl mx-auto px-4 py-8">
+        <h1 class="text-2xl font-bold text-gray-800 mb-2">Kerjakan Quiz</h1>
+        <p class="text-gray-600 mb-6">Pilih quiz, jawab soal satu per satu, dan lihat hasilnya!</p>
+
+        <!-- Pilih Quiz -->
+        <div v-if="!selectedQuiz" class="bg-white rounded-xl shadow p-6 mb-8">
+            <h2 class="text-lg font-semibold mb-4">Pilih Quiz</h2>
+            <select v-model="selectedQuizId" class="w-full rounded-md border-gray-300 focus:ring-blue-500 focus:border-blue-500 mb-4">
+                <option value="">Pilih quiz...</option>
+                <option v-for="quiz in quizzes" :key="quiz.id" :value="quiz.id">
+                    [[ quiz.title ]] ([[ quiz.description || '-' ]])
+                </option>
+            </select>
+            <button @click="startQuiz" :disabled="!selectedQuizId" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition disabled:opacity-50">Mulai Quiz</button>
+        </div>
+
+        <!-- Quiz Soal -->
+        <div v-if="selectedQuiz && !showResult" class="bg-white rounded-xl shadow p-6">
+            <div class="flex justify-between items-center mb-4">
+                <div class="text-lg font-semibold">[[ selectedQuiz.title ]]</div>
+                <div class="text-sm text-gray-500">Soal [[ currentIndex+1 ]]/[[ questions.length ]]</div>
+            </div>
+            <div class="mb-2 text-gray-700 font-medium">[[ currentQuestion.question_text ]]</div>
+            <div class="space-y-2 mb-4">
+                <label v-for="opt in ['A','B','C','D']" :key="opt" class="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" :value="opt" v-model="userAnswers[currentIndex]" class="accent-blue-600">
+                    <span>[[ opt ]]. [[ currentQuestion['option_'+opt.toLowerCase()] ]]</span>
+                </label>
+            </div>
+            <div class="flex justify-between items-center mt-6">
+                <button @click="prevQuestion" :disabled="currentIndex===0" class="px-4 py-2 rounded bg-gray-200 text-gray-700 hover:bg-gray-300 disabled:opacity-50">Sebelumnya</button>
+                <div class="flex-1 mx-4">
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div class="bg-blue-600 h-2 rounded-full" :style="{width: ((currentIndex+1)/questions.length*100)+'%'}"></div>
+                    </div>
+                </div>
+                <button v-if="currentIndex < questions.length-1" @click="nextQuestion" :disabled="!userAnswers[currentIndex]" class="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50">Selanjutnya</button>
+                <button v-else @click="submitQuiz" :disabled="!userAnswers[currentIndex]" class="px-4 py-2 rounded bg-green-600 text-white hover:bg-green-700 disabled:opacity-50">Selesai</button>
+            </div>
+            <div class="mt-4 text-sm text-gray-500">Waktu tersisa: <span class="font-semibold text-red-600">[[ timerDisplay ]]</span></div>
+        </div>
+
+        <!-- Hasil Quiz -->
+        <div v-if="showResult" class="bg-white rounded-xl shadow p-6 text-center">
+            <h2 class="text-xl font-bold mb-2">Quiz Selesai!</h2>
+            <div class="text-lg mb-2">Skor Anda: <span class="font-bold text-blue-700">[[ score ]]</span> dari <span class="font-bold">[[ questions.length ]]</span></div>
+            <div class="mb-4">[[ feedback ]]</div>
+            <button @click="resetQuiz" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition">Kerjakan Quiz Lain</button>
+        </div>
+    </div>
+    <script>
+        const { createApp } = Vue
+        const app = createApp({
+            data() {
+                return {
+                    quizzes: [],
+                    selectedQuizId: '',
+                    selectedQuiz: null,
+                    questions: [],
+                    currentIndex: 0,
+                    userAnswers: [],
+                    timer: 0,
+                    timerDisplay: '00:00',
+                    timerInterval: null,
+                    showResult: false,
+                    score: 0,
+                    feedback: ''
+                }
+            },
+            computed: {
+                currentQuestion() {
+                    return this.questions[this.currentIndex] || {}
+                }
+            },
+            methods: {
+                async fetchQuizzes() {
+                    const query = `query { allQuizzes { id title description isActive } }`
+                    const response = await fetch('/graphql', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query }) })
+                    const result = await response.json()
+                    this.quizzes = result.data.allQuizzes.filter(q => q.isActive)
+                },
+                async fetchQuestions(quizId) {
+                    const query = `query ($quizId: Int!) { questionsByQuiz(quizId: $quizId) { id question_text option_a option_b option_c option_d correct_answer points } }`
+                    const response = await fetch('/graphql', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query, variables: { quizId: parseInt(quizId) } }) })
+                    const result = await response.json()
+                    this.questions = result.data.questionsByQuiz
+                },
+                startQuiz() {
+                    this.selectedQuiz = this.quizzes.find(q => q.id == this.selectedQuizId)
+                    this.fetchQuestions(this.selectedQuizId).then(() => {
+                        this.currentIndex = 0
+                        this.userAnswers = Array(this.questions.length).fill('')
+                        this.showResult = false
+                        this.startTimer()
+                    })
+                },
+                nextQuestion() {
+                    if (this.currentIndex < this.questions.length-1) this.currentIndex++
+                },
+                prevQuestion() {
+                    if (this.currentIndex > 0) this.currentIndex--
+                },
+                startTimer() {
+                    this.timer = this.questions.length * 30 // 30 detik per soal
+                    this.updateTimerDisplay()
+                    if (this.timerInterval) clearInterval(this.timerInterval)
+                    this.timerInterval = setInterval(() => {
+                        this.timer--
+                        this.updateTimerDisplay()
+                        if (this.timer <= 0) {
+                            clearInterval(this.timerInterval)
+                            this.submitQuiz()
+                        }
+                    }, 1000)
+                },
+                updateTimerDisplay() {
+                    const m = String(Math.floor(this.timer/60)).padStart(2,'0')
+                    const s = String(this.timer%60).padStart(2,'0')
+                    this.timerDisplay = `${m}:${s}`
+                },
+                submitQuiz() {
+                    clearInterval(this.timerInterval)
+                    let score = 0
+                    for (let i=0; i<this.questions.length; i++) {
+                        if (this.userAnswers[i] === this.questions[i].correct_answer) score++
+                    }
+                    this.score = score
+                    if (score === this.questions.length) this.feedback = 'Luar biasa! Semua jawaban benar.'
+                    else if (score >= this.questions.length/2) this.feedback = 'Bagus! Tapi masih bisa lebih baik.'
+                    else this.feedback = 'Ayo belajar lagi, semangat!'
+                    this.showResult = true
+                },
+                resetQuiz() {
+                    this.selectedQuiz = null
+                    this.selectedQuizId = ''
+                    this.questions = []
+                    this.currentIndex = 0
+                    this.userAnswers = []
+                    this.showResult = false
+                    this.score = 0
+                    this.feedback = ''
+                    this.timer = 0
+                    this.timerDisplay = '00:00'
+                }
+            },
+            mounted() {
+                this.fetchQuizzes()
+            }
+        })
+        app.config.compilerOptions.delimiters = ['[[', ']]']
+        app.mount('#app')
+    </script>
+</body>
+</html> 
