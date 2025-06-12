@@ -7,16 +7,23 @@
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 text-gray-800 font-sans">
+  <nav class="bg-white shadow p-4 flex justify-between items-center">
+  <div class="text-xl font-bold">LearnUp</div>
+  <div class="flex gap-4">
+    <a href="http://localhost:5002" class="text-blue-600 hover:underline">Course Manager</a>
+    <a href="http://localhost:5003" class="text-blue-600 hover:underline">Course Loan</a>
+    <a href="#" class="text-blue-600 hover:underline">Quiz</a>
+  </div>
+</nav>
   <div class="max-w-5xl mx-auto p-6">
     <h1 class="text-2xl font-semibold mb-4 italic">Course Manager</h1>
-
-    <form id="courseForm" class="bg-white border border-green-700 rounded-xl p-4 space-y-3 shadow">
+    <form id="courseForm" class="bg-white border border-indigo-700 rounded-xl p-4 space-y-3 shadow">
       <input type="hidden" id="courseId" />
-      <input type="text" id="title" placeholder="Title" required class="w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring focus:ring-green-700" />
-      <input type="text" id="description" placeholder="Short Description" required class="w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring focus:ring-green-700" />
-      <textarea id="content" placeholder="Content" required class="w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring focus:ring-green-700"></textarea>
+      <input type="text" id="title" placeholder="Title" required class="w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring focus:ring-indigo-700" />
+      <input type="text" id="description" placeholder="Short Description" required class="w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring focus:ring-indigo-700" />
+      <textarea id="content" placeholder="Content" required class="w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring focus:ring-indigo-700"></textarea>
       <div class="flex gap-3">
-        <button type="submit" id="submitBtn" class="bg-green-900 text-white px-4 py-2 rounded hover:bg-green-700 transition">Add Course</button>
+        <button type="submit" id="submitBtn" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition">Add Course</button>
         <button type="button" id="cancelBtn" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition hidden">Cancel</button>
       </div>
     </form>

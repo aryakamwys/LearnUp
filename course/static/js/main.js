@@ -116,7 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </a>
                 <p class="text-sm text-gray-600">${course.description}</p>
                 <div class="flex gap-2 mt-4">
-                    <button onclick="editCourse('${course.id}')" class="px-3 py-1 bg-green-800 text-white rounded hover:bg-green-700">Edit</button>
+                    <button onclick="editCourse('${course.id}')" class="px-3 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700">Edit</button>
                     <button onclick="deleteCourseHandler('${course.id}')" class="px-3 py-1 bg-red-700 text-white rounded hover:bg-red-600">Delete</button>
                 </div>
             `;
