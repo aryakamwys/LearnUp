@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Float
+from sqlalchemy import Column, Integer, String, DateTime, Float
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from database import Base
@@ -7,8 +7,8 @@ class QuizResult(Base):
     __tablename__ = 'quiz_results'
 
     id = Column(Integer, primary_key=True)
-    quiz_id = Column(Integer, ForeignKey('quizzes.id'), nullable=False)
-    user_id = Column(Integer, ForeignKey('users.id'), nullable=True)  # Optional if anonymous
+    quiz_id = Column(Integer, nullable=False)
+    user_id = Column(Integer, nullable=True)  # Remove foreign key constraint
     score = Column(Float, nullable=False)
     total_questions = Column(Integer, nullable=False)
     correct_answers = Column(Integer, nullable=False)

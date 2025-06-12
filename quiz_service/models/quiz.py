@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, Text, DateTime
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from database import Base
@@ -9,8 +9,8 @@ class Quiz(Base):
     id = Column(Integer, primary_key=True)
     title = Column(String(200), nullable=False)
     description = Column(Text)
-    course_id = Column(Integer, ForeignKey('courses.id'), nullable=True)  # Optional link to course
-    created_by = Column(Integer, ForeignKey('users.id'), nullable=True)  # Optional link to user
+    course_id = Column(Integer, nullable=True)  # Remove foreign key constraint
+    created_by = Column(Integer, nullable=True)  # Remove foreign key constraint
     time_limit = Column(Integer, default=0)  # Time limit in minutes, 0 = no limit
     passing_score = Column(Integer, default=70)  # Passing score percentage
     is_active = Column(Integer, default=1)  # 1 = active, 0 = inactive
