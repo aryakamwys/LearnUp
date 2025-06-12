@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Course Loan Management</title>
+    <title>Peminjaman Buku Untuk Kursus</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 </head>
@@ -11,7 +11,7 @@
     <div id="app" class="container mx-auto px-4 py-8">
         <!-- Header -->
         <header class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-800">Course Loan Management</h1>
+            <h1 class="text-3xl font-bold text-gray-800">Peminjaman Buku</h1>
             <p class="text-gray-600">Manage your course loans efficiently</p>
         </header>
 
@@ -20,14 +20,20 @@
             <h2 class="text-xl font-semibold mb-4">Create New Loan</h2>
             <form @submit.prevent="createLoan" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">User ID</label>
-                    <input type="number" v-model="newLoan.userId" required
+                    <label class="block text-sm font-medium text-gray-700">User</label>
+                    <select v-model="newLoan.userId" required
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        <option value="" disabled selected>Pilih User</option>
+                        <option v-for="user in users" :value="user.id">{% raw %}{{ user.id }} - {{ user.name }}{% endraw %}</option>
+                    </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Course ID</label>
-                    <input type="number" v-model="newLoan.courseId" required
+                    <label class="block text-sm font-medium text-gray-700">Course</label>
+                    <select v-model="newLoan.courseId" required
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        <option value="" disabled selected>Pilih Course</option>
+                        <option v-for="course in courses" :value="course.id">{% raw %}{{ course.id }} - {{ course.title }}{% endraw %}</option>
+                    </select>
                 </div>
                 <button type="submit"
                     class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
@@ -76,6 +82,8 @@
     </div>
 
     <script>
+        window.users = {{ users|tojson }};
+        window.courses = {{ courses|tojson }};
         const { createApp } = Vue
 
         createApp({
@@ -85,7 +93,9 @@
                     newLoan: {
                         userId: '',
                         courseId: ''
-                    }
+                    },
+                    users: window.users || [],
+                    courses: window.courses || []
                 }
             },
             methods: {
