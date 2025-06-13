@@ -1,5 +1,6 @@
 import graphene
 from werkzeug.security import generate_password_hash, check_password_hash
+import os
 
 from models.user import User
 from database import db_session
@@ -80,3 +81,10 @@ class Query(graphene.ObjectType):
 class Mutation(graphene.ObjectType):
     register_user = RegisterUser.Field()
     login_user = LoginUser.Field()
+
+
+# Seed admin user if not exists
+if not db_session.query(User).filter_by(username='admin').first():
+    admin = User(username='admin', email='admin@admin.com', password_hash=generate_password_hash('admin'))
+    db_session.add(admin)
+    db_session.commit()

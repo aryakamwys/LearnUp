@@ -53,6 +53,21 @@ services:
     command: python main.py
     restart: unless-stopped
 
+  quiz-service:
+    build:
+      context: ./quiz_service
+      dockerfile: Dockerfile
+    ports:
+      - "5004:5000"
+    volumes:
+      - ./quiz_service/app/data:/app/app/data
+    environment:
+      - FLASK_ENV=production
+    networks:
+      - app_network
+    restart: unless-stopped
+    command: gunicorn main:app --bind 0.0.0.0:5000 --workers=2
+
 networks:
   app_network:
-    driver: bridge
+    driver: bridge 

@@ -5,16 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Course Detail</title>
   <script src="https://cdn.tailwindcss.com"></script>
+   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body class="bg-gray-100 text-gray-800 font-sans">
-  <nav class="bg-white shadow p-4 flex justify-between items-center">
-  <div class="text-xl font-bold">LearnUp</div>
-  <div class="flex gap-4">
-    <a href="http://localhost:5002" class="text-blue-600 hover:underline">Course Manager</a>
-    <a href="http://localhost:5003" class="text-blue-600 hover:underline">Course Loan</a>
-    <a href="#" class="text-blue-600 hover:underline">Quiz</a>
-  </div>
-</nav>
+  <nav>
+    {% include 'component/navbar.html' %}
+  </nav>
   <div class="max-w-3xl mx-auto p-6">
     <a href="/" class="text-blue-600 hover:underline text-sm mb-4 inline-block">← Back to list</a>
     <div id="courseDetail" class="bg-white p-6 rounded-xl shadow-md">

@@ -3,34 +3,60 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Course Manager</title>
+  <title>Course Manager - Admin</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .card-hover { transition: all 0.3s ease; }
+    .card-hover:hover { transform: translateY(-5px); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
+  </style>
 </head>
-<body class="bg-gray-100 text-gray-800 font-sans">
-  <nav class="bg-white shadow p-4 flex justify-between items-center">
-  <div class="text-xl font-bold">LearnUp</div>
-  <div class="flex gap-4">
-    <a href="http://localhost:5002" class="text-blue-600 hover:underline">Course Manager</a>
-    <a href="http://localhost:5003" class="text-blue-600 hover:underline">Course Loan</a>
-    <a href="#" class="text-blue-600 hover:underline">Quiz</a>
-  </div>
-</nav>
-  <div class="max-w-5xl mx-auto p-6">
-    <h1 class="text-2xl font-semibold mb-4 italic">Course Manager</h1>
-    <form id="courseForm" class="bg-white border border-indigo-700 rounded-xl p-4 space-y-3 shadow">
-      <input type="hidden" id="courseId" />
-      <input type="text" id="title" placeholder="Title" required class="w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring focus:ring-indigo-700" />
-      <input type="text" id="description" placeholder="Short Description" required class="w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring focus:ring-indigo-700" />
-      <textarea id="content" placeholder="Content" required class="w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring focus:ring-indigo-700"></textarea>
-      <div class="flex gap-3">
-        <button type="submit" id="submitBtn" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition">Add Course</button>
-        <button type="button" id="cancelBtn" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition hidden">Cancel</button>
+<body class="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 text-gray-800 font-sans">
+
+  <!-- Navbar -->
+  {% include 'component/navbar.html' %}
+
+  <!-- Main Content (no header bar to avoid double-header look) -->
+  <div class="max-w-7xl mx-auto px-6 py-10">
+    <!-- Title Section -->
+    <div class="flex justify-between items-center mb-8">
+      <div class="flex items-center space-x-4">
+        <div class="bg-gradient-to-r from-blue-500 to-purple-600 p-3 rounded-full text-white shadow-md">
+          <i class="fas fa-book-open text-xl"></i>
+        </div>
+        <div>
+          <h1 class="text-2xl font-bold text-gray-800">Course Manager</h1>
+          <p class="text-sm text-gray-600">Kelola data kursus secara efisien</p>
+        </div>
       </div>
-    </form>
+      <button id="addCourseBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-full shadow text-sm transition">
+        <i class="fas fa-plus mr-2"></i>Tambah Kursus
+      </button>
+    </div>
 
-    <div id="coursesList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mt-8"></div>
+    <!-- Course Card Grid -->
+    <div id="coursesList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- Cards will be injected by JavaScript -->
+    </div>
   </div>
 
+  <!-- Floating Modal Form -->
+  <form id="courseForm" class="bg-white border border-indigo-700 rounded-2xl p-6 space-y-4 shadow-2xl fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 hidden w-full max-w-lg">
+    <input type="hidden" id="courseId" />
+    <input type="text" id="title" placeholder="Judul Kursus" required class="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-700" />
+    <input type="text" id="description" placeholder="Deskripsi Singkat" required class="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-700" />
+    <textarea id="content" placeholder="Isi Kursus" required class="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-700"></textarea>
+    <div class="flex justify-end gap-3 pt-2">
+      <button type="submit" id="submitBtn" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">Simpan</button>
+      <button type="button" id="cancelBtn" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Batal</button>
+    </div>
+  </form>
+
+  <!-- Overlay -->
+  <div id="overlay" class="fixed inset-0 bg-black bg-opacity-30 z-40 hidden"></div>
+
+  <!-- Inject Cards Script -->
   <script src="/static/js/main.js"></script>
 </body>
 </html>
