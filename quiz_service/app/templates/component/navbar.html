@@ -1,10 +1,31 @@
-<nav class="bg-white shadow p-4 flex justify-between items-center">
-  <div class="text-xl font-bold">LearnUp</div>
-  <div class="flex gap-4">
-    <a href="http://localhost:5001/admin" class="text-blue-600 hover:underline">Back to Admin</a>
-    <a href="http://localhost:5002" class="text-blue-600 hover:underline">Course</a>
-    <a href="http://localhost:5003" class="text-blue-600 hover:underline">Peminjaman Buku</a>
-    <a href="http://localhost:5004" class="text-blue-600 hover:underline">Quiz</a>
-    <button onclick="window.location.href='http://localhost:5001/'" class="ml-4 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">Logout</button>
+<nav class="bg-gradient-to-r from-indigo-500 to-purple-600 shadow-md text-white py-4 px-6">
+  <div class="max-w-7xl mx-auto flex justify-between items-center">
+    <!-- Logo dan Brand -->
+    <div class="flex items-center gap-3">
+      <div class="bg-white bg-opacity-20 p-2 rounded-full">
+        <i class="fas fa-graduation-cap text-xl text-white"></i>
+      </div>
+      <span class="text-2xl font-bold tracking-wide">LearnUp</span>
+    </div>
+
+    <!-- Menu Navigasi -->
+    <div class="flex flex-wrap gap-4 items-center text-sm font-medium">
+      <a href="http://localhost:5001/admin" class="hover:underline hover:text-blue-100 flex items-center gap-1">
+        <i class="fas fa-tachometer-alt"></i> Admin
+      </a>
+      <a href="http://localhost:5002" class="hover:underline hover:text-blue-100 flex items-center gap-1">
+        <i class="fas fa-book"></i> Course
+      </a>
+      <a href="http://localhost:5003" class="hover:underline hover:text-blue-100 flex items-center gap-1">
+        <i class="fas fa-book-reader"></i> Pinjam Buku
+      </a>
+      <a href="http://localhost:5004" class="hover:underline hover:text-blue-100 flex items-center gap-1">
+        <i class="fas fa-question-circle"></i> Quiz
+      </a>
+      <button onclick="window.location.href='http://localhost:5001/'"
+        class="bg-red-500 hover:bg-red-600 text-white px-4 py-1.5 rounded-full shadow-md transition flex items-center gap-1">
+        <i class="fas fa-sign-out-alt"></i> Logout
+      </button>
+    </div>
   </div>
 </nav>
