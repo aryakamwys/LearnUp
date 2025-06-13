@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  quiz_service:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./app/data:/app/app/data
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+    networks:
+      - quiz_network
+
+networks:
+  quiz_network:
+    driver: bridge 

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LearnUp - Quiz Questions</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <nav class="bg-white shadow-sm py-4 px-8 flex items-center justify-between">
+        <div class="text-xl font-bold text-gray-800">LearnUp</div>
+        <div class="space-x-6">
+            <a href="/" class="text-blue-700 hover:underline">Quiz Manager</a>
+            <a href="/questions" class="text-blue-700 hover:underline">Quiz Questions</a>
+        </div>
+    </nav>
+    <div id="app" class="max-w-4xl mx-auto px-4 py-8">
+        <h1 class="text-2xl font-bold text-gray-800 mb-2">Quiz Questions</h1>
+        <p class="text-gray-600 mb-6">Add and manage questions for your quizzes</p>
+
+        <!-- Select Quiz Card -->
+        <div class="bg-white rounded-xl shadow p-6 mb-8">
+            <h2 class="text-lg font-semibold mb-4">Select Quiz</h2>
+            <select v-model="selectedQuizId" @change="loadQuestions"
+                class="w-full rounded-md border-gray-300 focus:ring-blue-500 focus:border-blue-500">
+                <option value="">Choose a quiz...</option>
+                <option v-for="quiz in quizzes" :key="quiz.id" :value="quiz.id">
+                    [[ quiz.title ]] (Course [[ quiz.courseId ]])
+                </option>
+            </select>
+        </div>
+
+        <!-- Add Question Card -->
+        <div v-if="selectedQuizId" class="bg-white rounded-xl shadow p-6 mb-8">
+            <h2 class="text-lg font-semibold mb-4">Add New Question</h2>
+            <form @submit.prevent="addQuestion" class="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Question Text</label>
+                    <textarea v-model="newQuestion.questionText" rows="2" required class="w-full rounded-md border-gray-300 focus:ring-blue-500 focus:border-blue-500"></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Option A</label>
+                    <input type="text" v-model="newQuestion.optionA" required class="w-full rounded-md border-gray-300 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Option B</label>
+                    <input type="text" v-model="newQuestion.optionB" required class="w-full rounded-md border-gray-300 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Option C</label>
+                    <input type="text" v-model="newQuestion.optionC" required class="w-full rounded-md border-gray-300 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Option D</label>
+                    <input type="text" v-model="newQuestion.optionD" required class="w-full rounded-md border-gray-300 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Correct Answer</label>
+                    <select v-model="newQuestion.correctAnswer" required class="w-full rounded-md border-gray-300 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">Select correct answer...</option>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                        <option value="D">D</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Points</label>
+                    <input type="number" v-model="newQuestion.points" min="1" value="1" required class="w-full rounded-md border-gray-300 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div class="md:col-span-2 flex justify-end">
+                    <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition">Add Question</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Questions Table Card -->
+        <div v-if="selectedQuizId" class="bg-white rounded-xl shadow p-6">
+            <h2 class="text-lg font-semibold mb-4">Questions for Selected Quiz</h2>
+            <div v-if="questions.length === 0" class="text-center py-8 text-gray-500">
+                No questions found for this quiz. Add some questions above!
+            </div>
+            <div v-else class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">#</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Question</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Options</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Correct</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Points</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <tr v-for="(question, idx) in questions" :key="question.id">
+                            <td class="px-4 py-2">[[ idx + 1 ]]</td>
+                            <td class="px-4 py-2">[[ question.questionText ]]</td>
+                            <td class="px-4 py-2">
+                                <div v-for="opt in ['A','B','C','D']" :key="opt">
+                                    <span :class="question.correctAnswer === opt ? 'font-bold text-green-700' : ''">
+                                        [[ opt ]]. [[ question['option'+opt] ]]
+                                    </span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-2 font-bold text-green-700">[[ question.correctAnswer ]]</td>
+                            <td class="px-4 py-2">[[ question.points ]]</td>
+                            <td class="px-4 py-2">
+                                <button @click="deleteQuestion(question.id)" class="text-red-700 font-semibold hover:underline">Delete</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script>
+        const { createApp } = Vue
+        const app = createApp({
+            data() {
+                return {
+                    quizzes: [],
+                    questions: [],
+                    selectedQuizId: '',
+                    newQuestion: { questionText: '', optionA: '', optionB: '', optionC: '', optionD: '', correctAnswer: '', points: 1 }
+                }
+            },
+            methods: {
+                async fetchQuizzes() {
+                    const query = `query { allQuizzes { id title courseId } }`
+                    const response = await fetch('/graphql', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query }) })
+                    const result = await response.json()
+                    this.quizzes = result.data.allQuizzes
+                },
+                async loadQuestions() {
+                    if (!this.selectedQuizId) { this.questions = []; return }
+                    const query = `query ($quizId: Int!) { questionsByQuiz(quizId: $quizId) { id questionText optionA optionB optionC optionD correctAnswer points } }`
+                    const response = await fetch('/graphql', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query, variables: { quizId: parseInt(this.selectedQuizId) } }) })
+                    const result = await response.json()
+                    this.questions = result.data.questionsByQuiz
+                },
+                async addQuestion() {
+                    const mutation = `mutation ($quizId: Int!, $questionText: String!, $optionA: String!, $optionB: String!, $optionC: String!, $optionD: String!, $correctAnswer: String!, $points: Int!) { createQuizQuestion(quizId: $quizId, questionText: $questionText, optionA: $optionA, optionB: $optionB, optionC: $optionC, optionD: $optionD, correctAnswer: $correctAnswer, points: $points) { question { id } ok } }`
+                    const response = await fetch('/graphql', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query: mutation, variables: { quizId: parseInt(this.selectedQuizId), questionText: this.newQuestion.questionText, optionA: this.newQuestion.optionA, optionB: this.newQuestion.optionB, optionC: this.newQuestion.optionC, optionD: this.newQuestion.optionD, correctAnswer: this.newQuestion.correctAnswer, points: parseInt(this.newQuestion.points) } }) })
+                    const result = await response.json()
+                    if (result.data.createQuizQuestion.ok) {
+                        this.newQuestion = { questionText: '', optionA: '', optionB: '', optionC: '', optionD: '', correctAnswer: '', points: 1 }
+                        await this.loadQuestions()
+                    }
+                },
+                async deleteQuestion(id) {
+                    if (!confirm('Are you sure you want to delete this question?')) return
+                    const mutation = `mutation ($id: Int!) { deleteQuizQuestion(id: $id) { ok } }`
+                    const response = await fetch('/graphql', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query: mutation, variables: { id } }) })
+                    const result = await response.json()
+                    if (result.data.deleteQuizQuestion.ok) await this.loadQuestions()
+                }
+            },
+            mounted() {
+                this.fetchQuizzes()
+            }
+        })
+        app.config.compilerOptions.delimiters = ['[[', ']]']
+        app.mount('#app')
+    </script>
+</body>
+</html> 
