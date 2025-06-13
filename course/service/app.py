@@ -16,7 +16,7 @@ else:
     TEMPLATE_FOLDER = os.path.join(BASE_DIR, 'course', 'templates')
 
 from flask import Flask, render_template
-from flask_graphql import GraphQLView
+from graphql_server.flask import GraphQLView
 from graphene import Schema
 from resolvers import Query, Mutation
 
