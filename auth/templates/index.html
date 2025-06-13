@@ -3,160 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Authentication</title>
+    <title>LearnUp Auth</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        // Function to switch between login and register forms
-        function switchForm(formId) {
-            document.getElementById('loginForm').classList.add('hidden');
-            document.getElementById('registerForm').classList.add('hidden');
-            document.getElementById(formId).classList.remove('hidden');
-        }
-
-        // Function to handle registration
-        async function handleRegister(event) {
-            event.preventDefault();
-            const username = document.getElementById('reg-username').value;
-            const email = document.getElementById('reg-email').value;
-            const password = document.getElementById('reg-password').value;
-
-            const query = `
-                mutation {
-                    registerUser(username: "${username}", email: "${email}", password: "${password}") {
-                        ok
-                        message
-                        user {
-                            id
-                            username
-                        }
-                    }
-                }
-            `;
-
-            try {
-                const response = await fetch('/graphql', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ query })
-                });
-                const result = await response.json();
-                
-                if (result.data.registerUser.ok) {
-                    alert('Registration successful!');
-                    switchForm('loginForm');
-                } else {
-                    alert(result.data.registerUser.message);
-                }
-            } catch (error) {
-                alert('Error during registration: ' + error.message);
-            }
-        }
-
-        // Function to handle login
-        async function handleLogin(event) {
-            event.preventDefault();
-            const username = document.getElementById('login-username').value;
-            const password = document.getElementById('login-password').value;
-
-            const query = `
-                mutation {
-                    loginUser(username: "${username}", password: "${password}") {
-                        ok
-                        message
-                        user {
-                            id
-                            username
-                        }
-                    }
-                }
-            `;
-
-            try {
-                const response = await fetch('/graphql', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ query })
-                });
-                const result = await response.json();
-                
-                if (result.data.loginUser.ok) {
-                    alert('Login successful!');
-                    // Here you can redirect to another page or update UI
-                } else {
-                    alert(result.data.loginUser.message);
-                }
-            } catch (error) {
-                alert('Error during login: ' + error.message);
-            }
-        }
-    </script>
+    <style>
+        .fade-in { animation: fadeIn 1s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(30px);} to { opacity: 1; transform: none; } }
+        .modal-fade { animation: modalFade 0.4s cubic-bezier(.4,0,.2,1); }
+        @keyframes modalFade { from { opacity: 0; transform: scale(0.95);} to { opacity: 1; transform: scale(1);} }
+    </style>
+    <script src="/static/script.js"></script>
 </head>
-<body class="bg-gray-100 min-h-screen flex items-center justify-center">
-    <div class="max-w-md w-full mx-4">
-        <!-- Login Form -->
-        <div id="loginForm" class="bg-white p-8 rounded-lg shadow-md">
-            <h2 class="text-2xl font-bold text-center text-gray-800 mb-8">Login</h2>
+<body class="bg-white min-h-screen flex flex-col items-center justify-center">
+    <!-- Floating Centered Navbar -->
+    <nav class="fade-in fixed top-8 left-0 right-0 mx-auto z-20 bg-white rounded-full shadow-lg px-8 py-3 flex items-center gap-8 border border-gray-100 w-fit max-w-full">
+        <img src="/static/img/logo.png" alt="Logo" class="h-8 w-8 rounded-full bg-gray-100 object-cover" onerror="this.style.display='none'">
+        <span class="text-xl font-bold text-gray-800 tracking-tight">LearnUp</span>
+        <div class="flex gap-2 ml-8">
+            <button onclick="showModal('login')" class="text-gray-700 hover:text-blue-600 font-medium px-4 py-1 rounded transition">Sign in</button>
+            <button onclick="showModal('register')" class="bg-blue-600 text-white px-5 py-1.5 rounded-full hover:bg-blue-700 font-medium shadow transition">Register</button>
+        </div>
+    </nav>
+    <!-- Landing Content -->
+    <main class="fade-in flex-1 flex flex-col items-center justify-center text-center px-4 pt-32">
+        <div class="relative w-full max-w-3xl mx-auto">
+            <img src="/static/img/hero.png" alt="Hero" class="mx-auto mb-8 w-64 md:w-80 rounded-2xl shadow-lg bg-gray-50 object-cover" onerror="this.style.display='none'">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">Think, plan, and track <br><span class="text-gray-400 font-normal">all in one place</span></h1>
+            <p class="text-lg text-gray-600 mb-8">Efficiently manage your tasks and boost productivity.</p>
+            <button onclick="showModal('login')" class="bg-blue-600 text-white px-8 py-3 rounded-full text-lg font-semibold shadow hover:bg-blue-700 transition">Get started</button>
+            <!-- Example custom image cards -->
+            <div class="flex flex-wrap justify-center gap-8 mt-12">
+                <div class="bg-white rounded-xl shadow p-4 flex flex-col items-center w-60 border border-gray-100">
+                    <img src="/static/img/note.png" alt="Note" class="w-16 h-16 mb-2 object-contain" onerror="this.style.display='none'">
+                    <span class="font-medium">Take notes to keep track of crucial details, and accomplish more tasks with ease.</span>
+                </div>
+                <div class="bg-white rounded-xl shadow p-4 flex flex-col items-center w-60 border border-gray-100">
+                    <img src="/static/img/reminder.png" alt="Reminder" class="w-16 h-16 mb-2 object-contain" onerror="this.style.display='none'">
+                    <span class="font-medium">Reminders and meeting schedules, all in one dashboard.</span>
+                </div>
+                <div class="bg-white rounded-xl shadow p-4 flex flex-col items-center w-60 border border-gray-100">
+                    <img src="/static/img/task.png" alt="Task" class="w-16 h-16 mb-2 object-contain" onerror="this.style.display='none'">
+                    <span class="font-medium">Today's tasks and progress at a glance.</span>
+                </div>
+                <div class="bg-white rounded-xl shadow p-4 flex flex-col items-center w-60 border border-gray-100">
+                    <img src="/static/img/integration.png" alt="Integration" class="w-16 h-16 mb-2 object-contain" onerror="this.style.display='none'">
+                    <span class="font-medium">100+ integrations with your favorite tools.</span>
+                </div>
+            </div>
+        </div>
+    </main>
+    <!-- Modal Background -->
+    <div id="modal-bg" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden">
+        <!-- Login Modal -->
+        <div id="loginModal" class="modal-fade bg-white rounded-xl shadow-lg w-full max-w-md p-8 relative hidden">
+            <button onclick="closeModal()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-700 text-2xl">&times;</button>
+            <h2 class="text-2xl font-bold text-center text-gray-800 mb-8">Sign In</h2>
             <form onsubmit="handleLogin(event)" class="space-y-6">
                 <div>
                     <label for="login-username" class="block text-sm font-medium text-gray-700">Username</label>
-                    <input type="text" id="login-username" required
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    <input type="text" id="login-username" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                 </div>
                 <div>
                     <label for="login-password" class="block text-sm font-medium text-gray-700">Password</label>
-                    <input type="password" id="login-password" required
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    <input type="password" id="login-password" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                 </div>
-                <button type="submit"
-                    class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                    Sign In
-                </button>
+                <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Sign In</button>
             </form>
             <p class="mt-4 text-center text-sm text-gray-600">
                 Don't have an account?
-                <button onclick="switchForm('registerForm')"
-                    class="font-medium text-indigo-600 hover:text-indigo-500">
-                    Register
-                </button>
+                <button onclick="showModal('register')" class="font-medium text-blue-600 hover:text-blue-500">Register</button>
             </p>
         </div>
-
-        <!-- Register Form -->
-        <div id="registerForm" class="hidden bg-white p-8 rounded-lg shadow-md">
+        <!-- Register Modal -->
+        <div id="registerModal" class="modal-fade bg-white rounded-xl shadow-lg w-full max-w-md p-8 relative hidden">
+            <button onclick="closeModal()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-700 text-2xl">&times;</button>
             <h2 class="text-2xl font-bold text-center text-gray-800 mb-8">Register</h2>
             <form onsubmit="handleRegister(event)" class="space-y-6">
                 <div>
                     <label for="reg-username" class="block text-sm font-medium text-gray-700">Username</label>
-                    <input type="text" id="reg-username" required
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    <input type="text" id="reg-username" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                 </div>
                 <div>
                     <label for="reg-email" class="block text-sm font-medium text-gray-700">Email</label>
-                    <input type="email" id="reg-email" required
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    <input type="email" id="reg-email" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                 </div>
                 <div>
                     <label for="reg-password" class="block text-sm font-medium text-gray-700">Password</label>
-                    <input type="password" id="reg-password" required
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    <input type="password" id="reg-password" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                 </div>
-                <button type="submit"
-                    class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                    Register
-                </button>
+                <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Register</button>
             </form>
             <p class="mt-4 text-center text-sm text-gray-600">
                 Already have an account?
-                <button onclick="switchForm('loginForm')"
-                    class="font-medium text-indigo-600 hover:text-indigo-500">
-                    Login
-                </button>
+                <button onclick="showModal('login')" class="font-medium text-blue-600 hover:text-blue-500">Sign In</button>
             </p>
         </div>
     </div>
+    <!-- Petunjuk gambar custom: Letakkan gambar di folder auth/static/img/ dan gunakan src="/static/img/nama_gambar.png" -->
 </body>
 </html>

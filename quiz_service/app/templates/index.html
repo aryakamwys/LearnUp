@@ -8,13 +8,10 @@
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 </head>
 <body class="bg-gray-100 min-h-screen">
-    <nav class="bg-white shadow-sm py-4 px-8 flex items-center justify-between">
-        <div class="text-xl font-bold text-gray-800">LearnUp</div>
-        <div class="space-x-6">
-            <a href="/" class="text-blue-700 hover:underline">Quiz Manager</a>
-            <a href="/questions" class="text-blue-700 hover:underline">Quiz Questions</a>
-        </div>
+    <nav>
+        {% include 'component/navbar.html' %}
     </nav>
+    
     <div id="app" class="max-w-5xl mx-auto px-4 py-8">
         <h1 class="text-2xl font-bold text-gray-800 mb-2">Quiz Management</h1>
         <p class="text-gray-600 mb-6">Create and manage quizzes for your courses</p>
