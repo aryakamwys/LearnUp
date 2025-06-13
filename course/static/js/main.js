@@ -7,7 +7,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const overlay = document.getElementById('overlay');
 
     let courses = [];
-    let editing = false;
 
     loadCourses();
 
@@ -112,42 +111,60 @@ document.addEventListener('DOMContentLoaded', () => {
     function displayCourses(highlightId = null) {
         coursesList.innerHTML = '';
         courses.forEach(course => {
-            const el = document.createElement('div');
-            el.className = 'bg-white p-4 rounded-xl shadow hover:shadow-lg transition flex flex-col';
+            const card = document.createElement('div');
+            card.className = 'bg-white p-5 rounded-2xl shadow-md card-hover relative group';
+
             if (highlightId && course.id === highlightId) {
-                el.classList.add('ring-2', 'ring-indigo-400');
+                card.classList.add('ring-2', 'ring-indigo-400');
                 setTimeout(() => {
-                    el.classList.remove('ring-2', 'ring-indigo-400');
+                    card.classList.remove('ring-2', 'ring-indigo-400');
                 }, 2000);
             }
-            el.innerHTML = `
-                <a href="/course.html?id=${course.id}" class="block w-fit">
-                  <h3 class="text-lg font-semibold text-blue-700 cursor-pointer mb-1 hover:underline">${course.title}</h3>
-                </a>
-                <p class="text-sm text-gray-600 mb-2">${course.description}</p>
-                <div class="flex gap-2 mt-2">
-                    <button class="px-3 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700" data-edit="${course.id}">Edit</button>
-                    <button class="px-3 py-1 bg-red-700 text-white rounded hover:bg-red-600" data-delete="${course.id}">Delete</button>
+
+            card.innerHTML = `
+                <div class="flex items-start justify-between mb-3">
+                    <a href="/course.html?id=${course.id}" class="flex-1 hover:underline">
+                        <h3 class="text-lg font-bold text-indigo-700">${course.title}</h3>
+                        <p class="text-sm text-gray-600 mt-1">${course.description}</p>
+                    </a>
+                    <i class="fas fa-graduation-cap text-indigo-400 text-xl"></i>
+                </div>
+                <div class="flex justify-end gap-2 mt-4">
+                    <button class="bg-indigo-600 text-white px-3 py-1 rounded text-sm hover:bg-indigo-700" data-edit="${course.id}">
+                        <i class="fas fa-edit mr-1"></i>Edit
+                    </button>
+                    <button class="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700" data-delete="${course.id}">
+                        <i class="fas fa-trash-alt mr-1"></i>Delete
+                    </button>
                 </div>
             `;
-            el.querySelector('[data-edit]').addEventListener('click', () => {
+
+            // Tambahkan event listener tombol (jangan ikut redirect link)
+            card.querySelector('[data-edit]').addEventListener('click', (e) => {
+                e.stopPropagation();
+                e.preventDefault();
                 editCourse(course.id);
             });
-            el.querySelector('[data-delete]').addEventListener('click', async () => {
-                if (confirm("Delete this course?")) {
+
+            card.querySelector('[data-delete]').addEventListener('click', async (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                if (confirm("Hapus kursus ini?")) {
                     try {
                         await deleteCourse(course.id);
                         await loadCourses();
                     } catch (err) {
                         console.error(err);
-                        alert("Error during deletion: " + err.message);
+                        alert("Gagal hapus: " + err.message);
                     }
                 }
             });
-            coursesList.appendChild(el);
+
+            coursesList.appendChild(card);
+
             if (highlightId && course.id === highlightId) {
                 setTimeout(() => {
-                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }, 100);
             }
         });
@@ -169,11 +186,13 @@ document.addEventListener('DOMContentLoaded', () => {
         courseForm.classList.remove('hidden');
         overlay.classList.remove('hidden');
     }
+
     function hideForm() {
         courseForm.classList.add('hidden');
         overlay.classList.add('hidden');
         resetForm();
     }
+
     function resetForm() {
         courseForm.reset();
         document.getElementById('courseId').value = '';
